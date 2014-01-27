@@ -28,15 +28,15 @@ use HTTP::Daemon;
 use URI::Escape qw(uri_unescape);
 use JSON::XS qw(encode_json decode_json);
 # LaTeXML packages
-use LaTeXML::Converter;
-use LaTeXML::Util::Config;
+use LaTeXML;
+use LaTeXML::Common::Config;
 use LaTeXML::Util::Pathname;
 #**********************************************************************
 
 # Bookkeeping
 my $ARGV_SAVED = [@ARGV],    #Save, so that we reinvoke when flushed
   # Read default options
-  my $g_opts = LaTeXML::Util::Config->new('input_limit' => 100, expire => 600);
+  my $g_opts = LaTeXML::Common::Config->new('input_limit' => 100, expire => 600);
 $g_opts->read(\@ARGV);
 
 # Set up the server
@@ -69,7 +69,7 @@ while (my $client = $server->accept()) {
     alarm(0);    # We are processing, ignore timeout here
 
     # Thaw request into options:
-    my $opts = LaTeXML::Util::Config->new();
+    my $opts = LaTeXML::Common::Config->new();
     $opts->read_keyvals([map { uri_unescape($_) } map { split('=', $_) } split('&', $request->content)]);
     # Local if peerhost is localhost:
     $opts->set('local', $client->peerhost eq '127.0.0.1');
@@ -95,10 +95,10 @@ while (my $client = $server->accept()) {
       $opts->set($_, $g_opts->get($_)) unless $opts->exists($_);
     }
     # Print to regular STDERR if debugging is requested
-    *STDERR = *STDERR_SAVED if ($LaTeXML::Converter::DEBUG);
+    *STDERR = *STDERR_SAVED if ($LaTeXML::DEBUG);
 
     # Boot/find a daemon:
-    my $converter = LaTeXML::Converter->get_converter($opts);
+    my $converter = LaTeXML->get_converter($opts);
     #Override/extend with session-specific options in $opt:
     $converter->prepare_session($opts);
 
@@ -191,12 +191,12 @@ Remains initialized in memory until an inactivity timeout occurs.
 
 =head1 SYNOPSYS
 
-See the OPTIONS section in L<LaTeXML::Util::Config> for usage information.
+See the OPTIONS section in L<LaTeXML::Common::Config> for usage information.
 Also consult latexmls --help
 
 =head1 SEE ALSO
 
-L<latexmlc>, L<ltxmojo>, L<LaTeXML::Util::Config>
+L<latexmlc>, L<ltxmojo>, L<LaTeXML::Common::Config>
 
 =cut
 #**********************************************************************

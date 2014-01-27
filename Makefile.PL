@@ -13,7 +13,7 @@ WriteMakefile(
   ABSTRACT => "latexmls - A socket server for daemonized LaTeXML processing",
   VERSION_FROM => 'bin/latexmls',
   PREREQ_PM => {
-    'LaTeXML' => '0.7.9',
+    'LaTeXML' => '0.7.99',
   },
   EXE_FILES => ['bin/latexmls'],
   test => {TESTS => 't/*.t'}
