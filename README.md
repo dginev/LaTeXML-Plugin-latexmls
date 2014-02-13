@@ -3,8 +3,7 @@ LaTeXML::Plugin::latexmls
 
 A socket server for daemonized LaTeXML processing
 
-Installation
-===
+### Installation
 
 Just another Perl module:
 ```
