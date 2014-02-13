@@ -12,7 +12,7 @@ use strict;
 use warnings;
 use FindBin;
 
-$VERSION = '1.0';
+my $VERSION = '1.0';
 
 my $RealBin_safe;
 BEGIN {
