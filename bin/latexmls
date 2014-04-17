@@ -1,8 +1,11 @@
 #!/usr/bin/perl -w
 
-###############################
-# A Socket Server for LaTeXML #
-###############################
+#####################################
+# An HTTP Socket Server for LaTeXML #
+#####################################
+
+# Created and provided by Deyan Ginev
+#   released in the Public Domain
 
 eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}'
   if 0;    # not running under some shell
@@ -12,7 +15,7 @@ use strict;
 use warnings;
 use FindBin;
 
-my $VERSION = '1.0';
+our $VERSION = '1.0';
 
 my $RealBin_safe;
 BEGIN {
@@ -23,8 +26,8 @@ BEGIN {
 # TODO: We probably want file cat for things like /../lib instead of spelling out a Unix path
 use lib $RealBin_safe. "/../lib";
 # Server-specific
-use POSIX qw( setsid );
 use HTTP::Daemon;
+use POSIX qw( setsid );
 use URI::Escape qw(uri_unescape);
 use JSON::XS qw(encode_json decode_json);
 # LaTeXML packages
@@ -186,7 +189,7 @@ __END__
 
 =head1 NAME
 
-C<latexmls> - A server for latexml, latexmlpost and latexmlmath.
+C<latexmls> - An HTTP server for latexml, latexmlpost and latexmlmath.
 Remains initialized in memory until an inactivity timeout occurs.
 
 =head1 SYNOPSYS
@@ -196,7 +199,16 @@ Also consult latexmls --help
 
 =head1 SEE ALSO
 
-L<latexmlc>, L<ltxmojo>, L<LaTeXML::Common::Config>
+L<latexmlc>, L<LaTeXML::Common::Config>
+
+=head1 AUTHOR
+
+Deyan Ginev <deyan.ginev@nist.gov>
+
+=head1 COPYRIGHT
+
+Public domain software, produced as part of work done by the
+United States Government & not subject to copyright in the US.
 
 =cut
 #**********************************************************************
