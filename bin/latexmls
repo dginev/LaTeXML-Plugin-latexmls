@@ -62,10 +62,12 @@ alarm($g_opts->get('expire'));    #Timeout if inactive for too long...
 while (my $client = $server->accept()) {
   while (my $request = $client->get_request) {
     if (!$request->content) {
-      $client->send_response(HTTP::Response->new(400, 'Empty request?!'));
+      $client->send_response(HTTP::Response->new(400, 'Fatal:http:request Empty request?!'));
+      $client->close;
       next;
     } elsif ($request->method ne 'POST') {
-      $client->send_response(HTTP::Response->new(405, 'Only POST allowed'));
+      $client->send_response(HTTP::Response->new(405, 'Fatal:http:request Only POST allowed'));
+      $client->close;
       next;
     }
     # Bookkeeping...
@@ -73,7 +75,15 @@ while (my $client = $server->accept()) {
 
     # Thaw request into options:
     my $opts = LaTeXML::Common::Config->new();
-    $opts->read_keyvals([map { uri_unescape($_) } map { split('=', $_) } split('&', $request->content)]);
+    my $config_build_return = eval {
+      $opts->read_keyvals([map { uri_unescape($_) } map { split('=', $_) } split('&', $request->content)],silent=>1); };
+    if (!$config_build_return || $@) {
+      # Wrong options, report error.
+      $@ = "See 'latexmlc --help' for the full options specification" unless $@;
+      $client->send_response(HTTP::Response->new(400, "Fatal:http:request You have used illegal or ill-formed options in your request.\n Details:$@"));
+      $client->close;
+      next;
+    }
     # Local if peerhost is localhost:
     $opts->set('local', $client->peerhost eq '127.0.0.1');
     $opts->set('source', $opts->get('tex')) if (!($opts->get('source')) && $opts->get('tex'));
