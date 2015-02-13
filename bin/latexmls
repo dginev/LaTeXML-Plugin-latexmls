@@ -98,7 +98,7 @@ while (my $client = $server->accept()) {
       if ($canonical_base ne pathname_cwd()) {
         chdir $canonical_base
           or croak("Fatal:server:chdir Can't chdir to $canonical_base: $!");
-        $LaTeXML::Util::Pathname::Pathname_CWD = $canonical_base;
+        $LaTeXML::Util::Pathname::cached_cwd = $canonical_base;
       }
     }
 
