@@ -15,7 +15,7 @@ use strict;
 use warnings;
 use FindBin;
 
-our $VERSION = '1.1';
+our $VERSION = '1.2';
 
 my $RealBin_safe;
 BEGIN {
@@ -76,7 +76,14 @@ while (my $client = $server->accept()) {
     # Thaw request into options:
     my $opts = LaTeXML::Common::Config->new();
     my $config_build_return = eval {
-      $opts->read_keyvals([map { uri_unescape($_) } map { split('=', $_) } split('&', $request->content)],silent=>1); };
+      # Split, and make sure keys with no values get an empty string stub
+      my $keyvals = [
+        map { $$_[0], $$_[1] ? uri_unescape($$_[1]) : '' }
+        map { [split(/=/,$_,2)] } # Split key=values
+        map { split(/\&/,$_)} # Split URI options
+        $request->content ];
+
+      $opts->read_keyvals($keyvals,silent=>1); };
     if (!$config_build_return || $@) {
       # Wrong options, report error.
       $@ = "See 'latexmlc --help' for the full options specification" unless $@;
@@ -99,6 +106,8 @@ while (my $client = $server->accept()) {
         chdir $canonical_base
           or croak("Fatal:server:chdir Can't chdir to $canonical_base: $!");
         $LaTeXML::Util::Pathname::cached_cwd = $canonical_base;
+        # Prevent spurious warning; we may not use the cached_cwd, but we really want to have it around
+        $LaTeXML::Util::Pathname::cached_cwd if 0;
       }
     }
 
