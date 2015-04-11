@@ -29,6 +29,7 @@ use lib $RealBin_safe. "/../lib";
 use HTTP::Daemon;
 use POSIX qw( setsid );
 use URI::Escape qw(uri_unescape);
+use Encode;
 use JSON::XS qw(encode_json decode_json);
 # LaTeXML packages
 use LaTeXML;
@@ -78,7 +79,7 @@ while (my $client = $server->accept()) {
     my $config_build_return = eval {
       # Split, and make sure keys with no values get an empty string stub
       my $keyvals = [
-        map { $$_[0], $$_[1] ? uri_unescape($$_[1]) : '' }
+        map { $$_[0], $$_[1] ? decode('utf-8',uri_unescape($$_[1])) : '' }
         map { [split(/=/,$_,2)] } # Split key=values
         map { split(/\&/,$_)} # Split URI options
         $request->content ];
