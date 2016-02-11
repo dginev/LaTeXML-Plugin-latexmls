@@ -115,7 +115,7 @@ while (my $client = $server->accept()) {
     # We now have a LaTeXML options object - $opts.
     # Make sure the g_opts are included as defaults
     foreach ($g_opts->keys) {
-      $opts->set($_, $g_opts->get($_)) unless $opts->exists($_);
+      $opts->set($_, $g_opts->get($_)) unless defined $$opts{opts}{$_};
     }
     # Print to regular STDERR if debugging is requested
     *STDERR = *STDERR_SAVED if ($LaTeXML::DEBUG);
