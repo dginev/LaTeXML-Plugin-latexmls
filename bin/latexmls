@@ -128,13 +128,6 @@ while (my $client = $server->accept()) {
     #Send a request:
     $g_opts->set('input_counter', ($g_opts->get('input_counter') || 0) + 1);
     my $response = $converter->convert($source);
-    my ($result, $status, $log);
-    if (defined $response) {
-      ($result, $status, $log) = map { $response->{$_} } qw(result status log);
-    }
-
-    # Delete daemon if Fatal occurred
-    undef $converter unless defined $result;
 
     # Send back the serialized XML, log and status:
     $client->send_response(HTTP::Response->new(200, 'OK', undef, encode_json($response)));
