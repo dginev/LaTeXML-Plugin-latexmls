@@ -46,7 +46,7 @@ $g_opts->read(\@ARGV);
 # Set up the server
 my $server = setup_server($g_opts->get('port'));
 my $server_port = $server->sockport();
-print "LaTeXML server listening on $server_port\n";
+print STDERR "LaTeXML server listening on $server_port\n";
 #**********************************************************************
 # Daemonize
 daemonize();
