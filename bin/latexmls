@@ -15,7 +15,7 @@ use strict;
 use warnings;
 use FindBin;
 
-our $VERSION = '1.2';
+our $VERSION = '1.3';
 
 my $RealBin_safe;
 BEGIN {
@@ -137,10 +137,12 @@ while (my $client = $server->accept()) {
     #Flush daemon, every $input_limit files:
     if ($g_opts->get('input_limit') &&
       (($g_opts->get('input_counter') || 0) >= $g_opts->get('input_limit'))) {
+      $client->close;
       exec("$RealBin_safe/latexmls", @$ARGV_SAVED)
         or croak("Fatal:server:restart Daemon autoflush Failed!");
     }
     timeout_handler() if ($opts->get('expire') == -1);    # Terminate immediately if desired
+
     alarm($opts->get('expire'));                          #Timeout if inactive for too long...
   }
   $client->close;
@@ -150,7 +152,7 @@ while (my $client = $server->accept()) {
 sub timeout_handler {
   print STDERR "Daemon timed out after inactivity.\n";
   print STDERR "Self destructing...\n";
-  kill 'TERM', $$;
+  term_handler();
   return;
 }
 
