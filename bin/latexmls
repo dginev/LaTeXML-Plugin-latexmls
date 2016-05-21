@@ -15,7 +15,7 @@ use strict;
 use warnings;
 use FindBin;
 
-our $VERSION = '1.3';
+our $VERSION = '1.4';
 
 my $RealBin_safe;
 BEGIN {
@@ -141,9 +141,16 @@ while (my $client = $server->accept()) {
       exec("$RealBin_safe/latexmls", @$ARGV_SAVED)
         or croak("Fatal:server:restart Daemon autoflush Failed!");
     }
-    timeout_handler() if ($opts->get('expire') == -1);    # Terminate immediately if desired
 
-    alarm($opts->get('expire'));                          #Timeout if inactive for too long...
+    # Terminate immediately if requested
+    timeout_handler() if ($opts->get('expire') == -1);
+
+    # Important performance enhancement: if the conversion ended with a Fatal that threatened state,
+    #   a second initialization is needed, and we should do it *before* we accept the next job.
+    $converter->initialize_session unless $$converter{ready};
+
+    # Continue looking for a new request, timeout if inactive for too long...
+    alarm($opts->get('expire'));
   }
   $client->close;
   undef($client);
