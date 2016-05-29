@@ -14,6 +14,11 @@ WriteMakefile(
   VERSION_FROM => 'bin/latexmls',
   PREREQ_PM => {
     'LaTeXML' => '0.8.1',
+    'HTTP::Daemon' => 0,
+    'POSIX' => 0,
+    'URI' => 0,
+    'Encode' => 0,
+    'JSON::XS' => 0,
   },
   EXE_FILES => ['bin/latexmls'],
   test => {TESTS => 't/*.t'},
