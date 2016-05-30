@@ -1,0 +1,6 @@
+bin/latexmls
+LICENSE
+Makefile.PL
+MANIFEST			This list of files
+README.md
+t/0_basic.t
