@@ -3,9 +3,17 @@ use Test::More;
 use File::Which;
 use HTTP::Response;
 use JSON::XS qw(decode_json);
+use IO::Socket::INET;
 
 my $test_address = "localhost";
-my $test_port = 3334;
+
+# pick a random free port for this test, makes parallel testing more robust
+my $random_sock = IO::Socket::INET->new(
+    Proto     => 'tcp',
+    LocalAddr => 'localhost',
+);
+my $test_port = $random_sock->sockport();
+close($random_sock);
 
 # Make sure we have a free socket
 my $sock = IO::Socket::INET->new(
@@ -17,8 +25,7 @@ ok(!$sock, "latexmls default socket $test_port should be available, but wasn't, 
 
 my $latexmls = "blib/script/latexmls";
 # Boot a server
-is(system($latexmls,"--port=$test_port","--address=$test_address",'--expire=2','--timeout=2'), 0, 'failed to boot latexml binary');
-sleep 1;
+system($latexmls,"--port=$test_port","--address=$test_address",'--expire=2','--timeout=2');
 # TODO: Talk to the web service via HTTP
 #Setup client and communicate
 $sock = IO::Socket::INET->new(
