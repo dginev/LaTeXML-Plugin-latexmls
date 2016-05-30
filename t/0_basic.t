@@ -17,7 +17,7 @@ ok(!$sock, "latexmls default socket $test_port should be available, but wasn't, 
 
 my $latexmls = "blib/script/latexmls";
 # Boot a server
-is(0, system($latexmls,"--port=$test_port","--address=$test_address",'--expire=2','--timeout=2'), 'failed to boot latexml binary');
+is(system($latexmls,"--port=$test_port","--address=$test_address",'--expire=2','--timeout=2'), 0, 'failed to boot latexml binary');
 sleep 1;
 # TODO: Talk to the web service via HTTP
 #Setup client and communicate

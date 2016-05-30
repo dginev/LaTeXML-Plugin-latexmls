@@ -15,7 +15,7 @@ use strict;
 use warnings;
 use FindBin;
 
-our $VERSION = '1.4';
+our $VERSION = '1.4.1';
 
 my $RealBin_safe;
 BEGIN {
@@ -44,7 +44,9 @@ my $ARGV_SAVED = [@ARGV],    #Save, so that we reinvoke when flushed
 $g_opts->read(\@ARGV);
 
 # Set up the server
-my $server = setup_server($g_opts->get('port'));
+my $address = $g_opts->get('address') || 'localhost';
+my $port = $g_opts->get('port') || '3334';
+my $server = setup_server($address, $port);
 my $server_port = $server->sockport();
 print STDERR "LaTeXML server listening on $server_port\n";
 #**********************************************************************
@@ -189,9 +191,9 @@ sub daemonize {
 }
 
 sub setup_server {
-  my ($localport) = @_;
+  my ($localaddress, $localport) = @_;
   my $http_server = HTTP::Daemon->new(
-    LocalAddr => '127.0.0.1',
+    LocalAddr => $localaddress,
     LocalPort => $localport,
     Listen    => SOMAXCONN,
     Proto     => 'tcp',
