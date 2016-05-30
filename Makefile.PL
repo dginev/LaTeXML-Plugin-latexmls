@@ -8,7 +8,7 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-  NAME => 'latexmls',
+  NAME => 'LaTeXML::Plugin::latexmls',
   AUTHOR => 'Deyan Ginev <d.ginev@jacobs-university.de>',
   ABSTRACT => "latexmls - A socket server for daemonized LaTeXML processing",
   VERSION_FROM => 'bin/latexmls',
