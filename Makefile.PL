@@ -11,7 +11,7 @@ WriteMakefile(
   NAME => 'LaTeXML::Plugin::latexmls',
   AUTHOR => 'Deyan Ginev <d.ginev@jacobs-university.de>',
   ABSTRACT => "latexmls - A socket server for daemonized LaTeXML processing",
-  VERSION_FROM => 'bin/latexmls',
+  VERSION_FROM => 'lib/LaTeXML/Plugin/Latexmls.pm',
   PREREQ_PM => {
     'LaTeXML' => '0.8.1',
     'HTTP::Daemon' => 0,
