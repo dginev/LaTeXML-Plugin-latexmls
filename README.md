@@ -1,6 +1,6 @@
 # LaTeXML::Plugin::latexmls
 
-[![Build Status](https://secure.travis-ci.org/dginev/LaTeXML-Plugin-latexmls.png?branch=master)](https://travis-ci.org/dginev/LaTeXML-Plugin-latexmls)
+[![Build Status](https://api.travis-ci.com/dginev/LaTeXML-Plugin-latexmls.png?branch=master)](https://travis-ci.com/dginev/LaTeXML-Plugin-latexmls)
 [![license](http://img.shields.io/badge/license-Unlicense-blue.svg)](https://raw.githubusercontent.com/dginev/LaTeXML-Plugin-latexmls/master/LICENSE)
 [![CPAN version](https://badge.fury.io/pl/LaTeXML-Plugin-latexmls.svg)](https://badge.fury.io/pl/LaTeXML-Plugin-latexmls)
 
