@@ -14,7 +14,7 @@ WriteMakefile(
   VERSION_FROM => 'lib/LaTeXML/Plugin/Latexmls.pm',
   PREREQ_PM => {
     'LaTeXML' => '0.8.5',
-    'HTTP::Daemon' => 0,
+    'HTTP::Daemon' => '6',
     'POSIX' => 0,
     'URI' => 0,
     'Encode' => 0,

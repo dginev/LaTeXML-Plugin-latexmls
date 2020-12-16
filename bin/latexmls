@@ -126,8 +126,8 @@ while (my $client = $server->accept()) {
 
     # Boot/find a daemon:
     my $converter = LaTeXML->get_converter($opts);
-    #Override/extend with session-specific options in $opt:
-    $converter->prepare_session($opts);
+    # Initialize if needed
+    $converter->initialize_session unless $$converter{ready};
 
     #Send a request:
     $g_opts->set('input_counter', ($g_opts->get('input_counter') || 0) + 1);
@@ -199,7 +199,7 @@ sub setup_server {
     Proto     => 'tcp',
     Reuse     => 1,
   );
-  croak("Fatal:server:init can't setup server") unless $http_server;
+  croak("Fatal:server:init can't setup server on $localaddress:$localport") unless $http_server;
   return $http_server;
 }
 
