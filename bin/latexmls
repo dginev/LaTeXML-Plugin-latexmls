@@ -147,10 +147,6 @@ while (my $client = $server->accept()) {
     # Terminate immediately if requested
     timeout_handler() if ($opts->get('expire') == -1);
 
-    # Important performance enhancement: if the conversion ended with a Fatal that threatened state,
-    #   a second initialization is needed, and we should do it *before* we accept the next job.
-    $converter->initialize_session unless $$converter{ready};
-
     # Continue looking for a new request, timeout if inactive for too long...
     alarm($opts->get('expire'));
   }
