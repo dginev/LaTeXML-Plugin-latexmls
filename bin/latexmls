@@ -133,7 +133,10 @@ while (my $client = $server->accept()) {
     $g_opts->set('input_counter', ($g_opts->get('input_counter') || 0) + 1);
     my $response = $converter->convert($source);
 
-    # Send back the serialized XML, log and status:
+    # Send back the serialized result, log and status:
+    # ensure these are well-typed for consumers that will be doing strict JSON
+    $$response{status_code} = int($$response{status_code}); # ensure integer
+    $$response{result} = "" if ! defined $$response{result}; # avoid null
     $client->send_response(HTTP::Response->new(200, 'OK', undef, encode_json($response)));
 
     #Flush daemon, every $input_limit files:
