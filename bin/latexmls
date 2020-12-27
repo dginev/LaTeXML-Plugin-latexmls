@@ -55,7 +55,7 @@ print STDERR "LaTeXML server listening on $server_port\n";
 #**********************************************************************
 # Daemonize,
 #   if we expect to auto-reboot and want standalone robustness
-daemonize() if $input_limit && ($input_limit > 0);
+daemonize($input_limit);
 #**********************************************************************
 # Set up the processing.
 
@@ -176,22 +176,23 @@ sub term_handler {
 # TODO: Think about if the croaks can't be done better, so that the client
 #       receives the error/log message? or is that overkill?
 sub daemonize {
+  my $restartable = shift;
   #This causes more problems than it solves (e.g. sTeX setup)
   #chdir '/'                 or croak "Can't chdir to /: $!";
   open STDIN, '<', '/dev/null'
     or croak("Fatal:server:daemonize  Can't read /dev/null: $!");
   open STDOUT, '>', '/dev/null'
     or croak("Fatal:server:daemonize  Can't write to /dev/null: $!");
-  defined(my $pid = fork)
-    or croak("Fatal:server:daemonize  Can't fork: $!");
-  exit if $pid;
-  setsid
-    or croak("Fatal:server:daemonize  Can't start a new session: $!");
+  if ($restartable && $restartable > 0) {
+    defined(my $pid = fork)
+      or croak("Fatal:server:daemonize  Can't fork: $!");
+    exit if $pid;
+    setsid
+      or croak("Fatal:server:daemonize  Can't start a new session: $!"); }
   *STDERR_SAVED = *STDERR;
   *STDERR       = *STDOUT
     or croak("Fatal:server:daemonize Can't dup stdout: $!");
-  return;
-}
+  return; }
 
 sub setup_server {
   my ($localaddress, $localport) = @_;
