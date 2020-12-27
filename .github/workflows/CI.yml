@@ -1,0 +1,20 @@
+on: [push, pull_request]
+
+name: CI
+
+jobs:
+  test:
+    name: latexmls CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install LaTeXML dependencies
+        uses: ryankurte/action-apt@v0.2.0
+        with:
+          packages: "cpanminus libarchive-zip-perl libdb-dev libfile-which-perl libimage-magick-perl libimage-size-perl libio-string-perl libjson-xs-perl libparse-recdescent-perl libtext-unidecode-perl liburi-perl libuuid-tiny-perl libwww-perl libxml-libxml-perl libxml-libxslt-perl libxml2 libxml2-dev libxslt1-dev libxslt1.1"
+      - uses: actions/checkout@v2
+      - name: install dependencies
+        run: cpanm --sudo --notest --installdeps .
+      - name: make latexmls
+        run: "perl Makefile.PL && make"
+      - name: test latexmls
+        run: "make test"
