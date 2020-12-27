@@ -39,19 +39,23 @@ use LaTeXML::Util::Pathname;
 
 # Bookkeeping
 my $ARGV_SAVED = [@ARGV],    #Save, so that we reinvoke when flushed
-  # Read default options
-  my $g_opts = LaTeXML::Common::Config->new('input_limit' => 100, expire => 600);
+# Read default options
+my $g_opts = LaTeXML::Common::Config->new('input_limit' => 100, expire => 600);
 $g_opts->read(\@ARGV);
 
 # Set up the server
+# Global constants can be read into fixed variables:
 my $address = $g_opts->get('address') || 'localhost';
 my $port = $g_opts->get('port') || '3334';
 my $server = setup_server($address, $port);
 my $server_port = $server->sockport();
+my $input_limit = $g_opts->get('input_limit');
+my $input_counter = 0;
 print STDERR "LaTeXML server listening on $server_port\n";
 #**********************************************************************
-# Daemonize
-daemonize();
+# Daemonize,
+#   if we expect to auto-reboot and want standalone robustness
+daemonize() if $input_limit && ($input_limit > 0);
 #**********************************************************************
 # Set up the processing.
 
@@ -130,7 +134,7 @@ while (my $client = $server->accept()) {
     $converter->initialize_session unless $$converter{ready};
 
     #Send a request:
-    $g_opts->set('input_counter', ($g_opts->get('input_counter') || 0) + 1);
+    $input_counter++ if $input_limit;
     my $response = $converter->convert($source);
 
     # Send back the serialized result, log and status:
@@ -140,8 +144,8 @@ while (my $client = $server->accept()) {
     $client->send_response(HTTP::Response->new(200, 'OK', undef, encode_json($response)));
 
     #Flush daemon, every $input_limit files:
-    if ($g_opts->get('input_limit') &&
-      (($g_opts->get('input_counter') || 0) >= $g_opts->get('input_limit'))) {
+    if ($input_limit &&
+      ($input_counter >= $input_limit)) {
       $client->close;
       exec("$RealBin_safe/latexmls", @$ARGV_SAVED)
         or croak("Fatal:server:restart Daemon autoflush Failed!");
