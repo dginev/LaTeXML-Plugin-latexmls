@@ -7,9 +7,6 @@
 # Created and provided by Deyan Ginev
 #   released in the Public Domain
 
-eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}'
-  if 0;    # not running under some shell
-
 # General packages
 use strict;
 use warnings;
@@ -51,6 +48,7 @@ my $server = setup_server($address, $port);
 my $server_port = $server->sockport();
 my $input_limit = $g_opts->get('input_limit');
 my $input_counter = 0;
+my $client;
 print STDERR "LaTeXML server listening on $server_port\n";
 #**********************************************************************
 # Daemonize,
@@ -62,21 +60,25 @@ daemonize($input_limit);
 # Install signal-handlers
 local $SIG{'ALRM'} = 'timeout_handler';
 local $SIG{'TERM'} = 'term_handler';
+local $SIG{'KILL'} = 'term_handler';
+local $SIG{'HUP'} = 'term_handler';
 local $SIG{'INT'}  = 'term_handler';
 
 alarm($g_opts->get('expire'));    #Timeout if inactive for too long...
 #**********************************************************************
 # Process files on demand:
 
-while (my $client = $server->accept()) {
+while ($client = $server->accept()) {
   while (my $request = $client->get_request) {
     if (!$request->content) {
       $client->send_response(HTTP::Response->new(400, 'Fatal:http:request Empty request?!'));
       $client->close;
+      undef($client);
       next;
     } elsif ($request->method ne 'POST') {
       $client->send_response(HTTP::Response->new(405, 'Fatal:http:request Only POST allowed'));
       $client->close;
+      undef($client);
       next;
     }
     # Bookkeeping...
@@ -98,6 +100,7 @@ while (my $client = $server->accept()) {
       $@ = "See 'latexmlc --help' for the full options specification" unless $@;
       $client->send_response(HTTP::Response->new(400, "Fatal:http:request You have used illegal or ill-formed options in your request.\n Details:$@"));
       $client->close;
+      undef($client);
       next;
     }
     # Local if peerhost is localhost:
@@ -147,6 +150,7 @@ while (my $client = $server->accept()) {
     if ($input_limit &&
       ($input_counter >= $input_limit)) {
       $client->close;
+      undef($client);
       exec("$RealBin_safe/latexmls", @$ARGV_SAVED)
         or croak("Fatal:server:restart Daemon autoflush Failed!");
     }
@@ -161,15 +165,12 @@ while (my $client = $server->accept()) {
   undef($client);
 }
 
-sub timeout_handler {
-  print STDERR "Daemon timed out after inactivity.\n";
-  print STDERR "Self destructing...\n";
-  term_handler();
-  return;
-}
-
 sub term_handler {
-  print STDERR "Exiting...\n";
+  print STDERR_SAVED "Signal $! - latexmls exiting\n";
+  if ($client) {
+    $client->close;
+    undef($client);
+  }
   exit;
 }
 
