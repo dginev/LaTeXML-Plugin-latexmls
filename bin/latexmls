@@ -48,8 +48,8 @@ my $server = setup_server($address, $port);
 my $server_port = $server->sockport();
 my $input_limit = $g_opts->get('input_limit');
 my $input_counter = 0;
+my $expire = $g_opts->get('expire');
 my $client;
-print STDERR "LaTeXML server listening on $server_port\n";
 #**********************************************************************
 # Daemonize,
 #   if we expect to auto-reboot and want standalone robustness
@@ -58,18 +58,16 @@ daemonize($input_limit);
 # Set up the processing.
 
 # Install signal-handlers
-local $SIG{'ALRM'} = 'timeout_handler';
+local $SIG{'ALRM'} = 'term_handler';
 local $SIG{'TERM'} = 'term_handler';
 local $SIG{'KILL'} = 'term_handler';
 local $SIG{'HUP'} = 'term_handler';
 local $SIG{'INT'}  = 'term_handler';
 
-alarm($g_opts->get('expire'));    #Timeout if inactive for too long...
 #**********************************************************************
 # Process files on demand:
-
 while ($client = $server->accept()) {
-  while (my $request = $client->get_request) {
+  while (my $request = $client->get_request()) {
     if (!$request->content) {
       $client->send_response(HTTP::Response->new(400, 'Fatal:http:request Empty request?!'));
       $client->close;
@@ -142,10 +140,12 @@ while ($client = $server->accept()) {
 
     # Send back the serialized result, log and status:
     # ensure these are well-typed for consumers that will be doing strict JSON
-    $$response{status_code} = int($$response{status_code}); # ensure integer
+    $$response{status_code} = defined $$response{status_code} ? int($$response{status_code}) : 3; # ensure integer
     $$response{result} = "" if ! defined $$response{result}; # avoid null
-    $client->send_response(HTTP::Response->new(200, 'OK', undef, decode('UTF-8',encode_json($response))));
-
+    my $payload = decode('UTF-8',encode_json($response));
+    $client->send_response(HTTP::Response->new(200, 'OK', undef, $payload));
+    undef($request);
+    
     #Flush daemon, every $input_limit files:
     if ($input_limit &&
       ($input_counter >= $input_limit)) {
@@ -156,21 +156,29 @@ while ($client = $server->accept()) {
     }
 
     # Terminate immediately if requested
-    timeout_handler() if ($opts->get('expire') == -1);
-
-    # Continue looking for a new request, timeout if inactive for too long...
-    alarm($opts->get('expire'));
+    if ($expire == -1) {
+      term_handler();
+    } elsif ($expire > 0) {
+      # Continue looking for a new request, timeout if inactive for too long...  
+      alarm($expire);
+    }
   }
   $client->close;
   undef($client);
 }
+term_handler();
+
+###############################
+### Auxiliaries:
 
 sub term_handler {
-  print STDERR_SAVED "Signal $! - latexmls exiting\n";
+  print STDERR "Signal $! - latexmls:$server_port exiting\n";
   if ($client) {
     $client->close;
     undef($client);
   }
+  $server->close;
+  undef($server);
   exit;
 }
 
@@ -198,10 +206,11 @@ sub daemonize {
 sub setup_server {
   my ($localaddress, $localport) = @_;
   my $http_server = HTTP::Daemon->new(
-    LocalAddr => $localaddress,
+    LocalHost => $localaddress,
     LocalPort => $localport,
     Listen    => SOMAXCONN,
-    Proto     => 'tcp',
+    ReuseAddr => 1,
+    ReusePort => 1,
     Reuse     => 1,
   );
   croak("Fatal:server:init can't setup server on $localaddress:$localport") unless $http_server;
@@ -210,6 +219,8 @@ sub setup_server {
 
 sub croak {
   print STDERR $_[0], "\n";
+  $client->close if $client;
+  $server->close if $server;
   exit 1;
 }
 
