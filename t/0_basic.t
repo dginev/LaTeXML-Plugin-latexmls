@@ -1,3 +1,5 @@
+use strict;
+use warnings;
 use IO::Socket;
 use Test::More;
 use File::Which;
@@ -25,7 +27,8 @@ ok(!$sock, "latexmls default socket $test_port should be available, but wasn't, 
 
 my $latexmls = "blib/script/latexmls";
 # Boot a server
-system($latexmls,"--port=$test_port","--address=$test_address",'--expire=2','--timeout=2');
+my $boot_status = system($latexmls,"--port=$test_port","--address=$test_address",'--expire=2','--timeout=2');
+is($boot_status, 0, "latexmls booted from the shell OK");
 # TODO: Talk to the web service via HTTP
 #Setup client and communicate
 $sock = IO::Socket::INET->new(
@@ -33,7 +36,6 @@ $sock = IO::Socket::INET->new(
   PeerPort => $test_port,
   Proto    => 'tcp',
 );    #Attempt connecting to a service
-
 ok($sock, 'latexmls not available after boot'); # socket is up and running
 
 my $test_message = "source=literal:\\TeX";
@@ -61,7 +63,7 @@ my $http_response = HTTP::Response->parse($response_string);
 ok($http_response->is_success, 'Request did not succeed!');
 my $response = decode_json($http_response->content);
 ok($response, "JSON payload was malformed.");
-($result, $status, $log) = map { $$response{$_} } qw(result status log);
+my ($result, $status, $log) = map { $$response{$_} } qw(result status log);
 
 # We dont control for searchpaths here, drop that line:
 $result =~ s/\<\?latexml searchpaths="[^"]*"\?\>\n//;
