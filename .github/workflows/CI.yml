@@ -12,8 +12,6 @@ jobs:
         with:
           packages: "cpanminus libarchive-zip-perl libdb-dev libfile-which-perl libimage-magick-perl libimage-size-perl libio-string-perl libjson-xs-perl libparse-recdescent-perl libtext-unidecode-perl liburi-perl libuuid-tiny-perl libwww-perl libxml-libxml-perl libxml-libxslt-perl libxml2 libxml2-dev libxslt1-dev libxslt1.1"
       - uses: actions/checkout@v2
-      - name: install specific latexml
-        run: cpanm --sudo --notest --skip-installed https://github.com/brucemiller/LaTeXML/tarball/2de10301dbac5af6f99fa91ef5a83c9a840b2ece
       - name: install dependencies
         run: cpanm --sudo --notest --installdeps .
       - name: make latexmls
