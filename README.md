@@ -31,13 +31,14 @@ On a generic level, `latexmls` takes an HTTP request and returns a JSON payload.
 2. Initialize a new cached conversion profile, using the `cache_key` capability with a mock conversion call. Specify all configuration you would typically provide for latexml/latexmlpost here.
 
     ```bash
-    curl http://localhost:43434 -o payload.json -d 'cache_key=myprofile&preload=article.cls&preload=texvc.sty&whatsin=math&whatsout=math&format=html5&source=literal:1'
+    curl http://localhost:43434 -o payload.json -d \
+    'cache_key=eg&preload=article.cls&preload=texvc.sty&whatsin=math&whatsout=math&format=html5&source=literal:1'
     ```
 
 3. Use the cached profile for real conversions.
 
     ```bash
-    curl http://localhost:43434 -o payload.json -d 'cache_key=myprofile&source=literal:\sqrt{x}>0'
+    curl http://localhost:43434 -o payload.json -d 'cache_key=eg&source=literal:\sqrt{x}>0'
     ```
 
     Note that latexmls expects proper [url encoding](https://en.wikipedia.org/wiki/Percent-encoding) if you're assembling your HTTP requests by hand, e.g. `\sqrt{x}` needs to be transmitted as `%5Csqrt%7Bx%7D`. This is done automatically by the curl `-d` flag in the example above.
