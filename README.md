@@ -62,3 +62,8 @@ On a generic level, `latexmls` takes an HTTP request and returns a JSON payload.
 ## Alternatives
 
 See also the [ltxmojo](https://github.com/dginev/LaTeXML-Plugin-ltxmojo/) web showcase which uses a proper web service framework, as a potential alternative or inspiration for bundling LaTeXML into your web framework of choice.
+
+
+### Security Warning
+
+While latexmls has been used in production settings, it is not secure standalone. At a minimum, known vulnerabilities in TeX-related I/O should be patched, e.g. using the [secureio](https://github.com/dginev/LaTeXML-Plugin-secureio/) plugin for latexml.
