@@ -13,7 +13,7 @@ WriteMakefile(
   ABSTRACT => "latexmls - A socket server for daemonized LaTeXML processing",
   VERSION_FROM => 'lib/LaTeXML/Plugin/Latexmls.pm',
   PREREQ_PM => {
-    'LaTeXML' => '0.8.5',
+    'LaTeXML' => '0.8.8',
     'HTTP::Daemon' => '6',
     'POSIX' => 0,
     'URI' => 0,
