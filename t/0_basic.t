@@ -77,7 +77,7 @@ my $expected_xml = <<XML;
 <document xmlns="http://dlmf.nist.gov/LaTeXML">
   <resource src="LaTeXML.css" type="text/css"/>
   <para>
-    <p>TeX</p>
+    <p><text class="ltx_TeX_logo" cssstyle="letter-spacing:-0.2em; margin-right:0.2em">T<text cssstyle="font-variant:small-caps;font-size:120%;" yoffset="-0.2ex">e</text>X</text></p>
   </para>
 </document>
 XML
